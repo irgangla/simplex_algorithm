@@ -82,27 +82,43 @@ void freeTableau(struct Tableau *tableau){
 void printTableau(struct Tableau *tableau){
   int i,j;
   struct Rational *tmp;
+  char **string = NULL;
 
   printf("Tableau:\n");
   for(i=0; i<tableau->cols; ++i){
-    printf("%8s ", *toString(tableau->c[i]));
+    string = toString(tableau->c[i]);
+    printf("%8s ", *string);
+    free(*string);
+    free(string);
   }
-  printf(" |  %8s\n", *toString(tableau->z));
+  string = toString(tableau->z);
+  printf(" |  %8s\n", *string);
+  free(*string);
+  free(string);
   for(i=0; i<tableau->cols; ++i){
     printf("---------");
   }
   printf("-------------\n");
   for(i=0; i<tableau->rows; ++i){
     for(j=0; j<tableau->cols; ++j){
-      printf("%8s ", *toString(tableau->A[i][j]));
+      string = toString(tableau->A[i][j]);
+      printf("%8s ", *string);
+      free(*string);
+      free(string);
     }
-    printf(" |  %8s\n", *toString(tableau->b[i]));
+    string = toString(tableau->b[i]);
+    printf(" |  %8s\n", *string);
+    free(*string);
+    free(string);
   }
 
   printf("Pivot-Line: %d, Pivot-Column: %d\n", tableau->pivotLine, tableau->pivotColumn);
 
   tmp = invertSign(tableau->z);
-  printf("aktueller Zielfunktionswert: %s\n", *toString(tmp));
+  string = toString(tmp);
+  printf("aktueller Zielfunktionswert: %s\n", *string);
+  free(*string);
+  free(string);
   free(tmp);
 
 
@@ -146,10 +162,14 @@ struct Rational **getSolution(struct Tableau *tableau){
 void printSolution(struct Tableau *tableau){
   int i;
   struct Rational **solution = getSolution(tableau);
+  char **string;
 
   printf("[ ");
   for(i=0; i<tableau->cols; ++i){
-    printf("%s", *toString(&((*solution)[i])));
+    string = toString(&((*solution)[i]));
+    printf("%s", *string);
+    free(*string);
+    free(string);
 
     if(i < tableau->cols-1){
       printf(", ");
@@ -220,7 +240,7 @@ void resizeTableau(struct Tableau *tableau, int equations, int variables){
 void updatePivot(struct Tableau *tableau){
   int i;
   struct Rational *min = createRational();
-  struct Rational *tmp;
+  struct Rational *tmp = NULL;
 
   tableau->pivotColumn = -1;
   tableau->pivotLine = -1;
@@ -257,7 +277,7 @@ void updatePivot(struct Tableau *tableau){
 
 void simplexStep(struct Tableau *tableau){
   int i, j;
-  struct Rational *pivotValue, *tmp, *fact;
+  struct Rational *pivotValue, *tmp, *tmp2, *fact;
 
 
   pivotValue = cloneRational(tableau->A[tableau->pivotLine][tableau->pivotColumn]);
@@ -278,12 +298,16 @@ void simplexStep(struct Tableau *tableau){
   fact = cloneRational(tableau->c[tableau->pivotColumn]);
   for(i=0; i<tableau->cols; ++i){
     tmp = tableau->c[i];
-    tableau->c[i] = subtract(tableau->c[i], multiply(tableau->A[tableau->pivotLine][i], fact));
+    tmp2 = multiply(tableau->A[tableau->pivotLine][i], fact);
+    tableau->c[i] = subtract(tableau->c[i], tmp2);
+    free(tmp2);
     free(tmp);
   }
 
   tmp = tableau->z;
-  tableau->z = subtract(tableau->z, multiply(tableau->b[tableau->pivotLine], fact));
+  tmp2 = multiply(tableau->b[tableau->pivotLine], fact);
+  tableau->z = subtract(tableau->z, tmp2);
+  free(tmp2);
   free(tmp);
   free(fact);
 
@@ -295,11 +319,15 @@ void simplexStep(struct Tableau *tableau){
     fact = cloneRational(tableau->A[j][tableau->pivotColumn]);
     for(i=0; i<tableau->cols; ++i){
       tmp = tableau->A[j][i];
-      tableau->A[j][i] = subtract(tableau->A[j][i], multiply(tableau->A[tableau->pivotLine][i], fact));
+      tmp2 = multiply(tableau->A[tableau->pivotLine][i], fact);
+      tableau->A[j][i] = subtract(tableau->A[j][i], tmp2);
+      free(tmp2);
       free(tmp);
     }
     tmp = tableau->b[j];
-    tableau->b[j] = subtract(tableau->b[j], multiply(tableau->b[tableau->pivotLine], fact));
+    tmp2 = multiply(tableau->b[tableau->pivotLine], fact);
+    tableau->b[j] = subtract(tableau->b[j], tmp2);
+    free(tmp2);
     free(tmp);
     free(fact);
   }

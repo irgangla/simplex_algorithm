@@ -8,7 +8,7 @@
 struct Tableau *createTestdata(void);
 
 int main(void){
-  struct Tableau *tableau, *phase1;
+  struct Tableau *tableau = NULL, *phase1 = NULL;
 
   tableau = createTestdata();
   printf("aktualisiere Pivot-Element ...\n");

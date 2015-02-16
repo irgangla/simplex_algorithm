@@ -7,7 +7,7 @@ struct Rational *createRational(){
 }
 
 struct Rational *getRational(int nominator, int denominator){
-  struct Rational *r;
+  struct Rational *r = NULL;
 
   r = (struct Rational *)malloc(sizeof(struct Rational));
   if(r == NULL){
@@ -50,7 +50,7 @@ struct Rational *multiply(struct Rational *a, struct Rational *b){
 
 struct Rational *divide(struct Rational *a, struct Rational *b){
   int n, d;
-  struct Rational *r;
+  struct Rational *r = NULL;
 
   n = (a->n) * (b->d);
   d = (a->d) * (b->n);
