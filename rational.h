@@ -3,9 +3,10 @@
 
 #define BUFFER 40
 
-struct Rational {
-  int n;
-  int d;
+struct Rational
+{
+    int n;
+    int d;
 };
 
 struct Rational *createRational();

@@ -17,17 +17,18 @@
  *
  * This structure groups all data used from the simplex algorithm.
  */
-struct Tableau{
-  int rows; /**< Number of equations = number of rows of A. */
-  int cols; /**< Number of none basis variables = number of columns of A. */
-  struct Rational ***A; /**< Matrix A. Ax = b. */
-  struct Rational **b; /**< Limits vector b. Ax = b. */
-  struct Rational **c; /**< Target function a. cx = z. */
-  struct Rational *z; /**< Target function value. cx = z. */
-  int pivotLine; /**< Current pivot line. */
-  int pivotColumn; /**< Current pivot column. */
-  int *bvs;  /**< Current basis variables. */
-  int *nbvs; /**< Current none basis variables. */
+struct Tableau
+{
+    int rows; /**< Number of equations = number of rows of A. */
+    int cols; /**< Number of none basis variables = number of columns of A. */
+    struct Rational ***A; /**< Matrix A. Ax = b. */
+    struct Rational **b; /**< Limits vector b. Ax = b. */
+    struct Rational **c; /**< Target function a. cx = z. */
+    struct Rational *z; /**< Target function value. cx = z. */
+    int pivotLine; /**< Current pivot line. */
+    int pivotColumn; /**< Current pivot column. */
+    int *bvs;  /**< Current basis variables. */
+    int *nbvs; /**< Current none basis variables. */
 };
 
 /**
@@ -43,6 +44,8 @@ struct Tableau{
  * @return pointer to new tableau
  */
 struct Tableau* create_tableau(int equations, int variables);
+
+
 /**
  * @brief Free memory of given tableau.
  *
@@ -51,7 +54,6 @@ struct Tableau* create_tableau(int equations, int variables);
  * @param tableau
  *    pointer to tableau to free
  */
-
 void freeTableau(struct Tableau *tableau);
 void printTableau(struct Tableau *tableau);
 void resizeTableau(struct Tableau *tableau, int equations, int variables);
