@@ -1,7 +1,7 @@
 /**
  * @brief Header file for simplex.
  *
- * This file describes the simplex methods and the simplex tableau, which is the
+ * This file describes the simplex functions and the simplex tableau, which is the
  * data structrue used for the algorithm.
  *
  * @file simplex.h
@@ -11,6 +11,8 @@
 
 #ifndef SIMPLEX_H
 #define SIMPLEX_H SIMPLEX_H
+
+#include "rational.h"
 
 /**
  * @brief Data structure for simplex algorithm.
@@ -43,7 +45,7 @@ struct Tableau
  *    number of variables of new tableau
  * @return pointer to new tableau
  */
-struct Tableau* create_tableau(int equations, int variables);
+struct Tableau* simplex_create_tableau(int equations, int variables);
 
 
 /**
@@ -54,19 +56,76 @@ struct Tableau* create_tableau(int equations, int variables);
  * @param tableau
  *    pointer to tableau to free
  */
-void freeTableau(struct Tableau *tableau);
-void printTableau(struct Tableau *tableau);
-void resizeTableau(struct Tableau *tableau, int equations, int variables);
-void updatePivot(struct Tableau *tableau);
-void simplexStep(struct Tableau *tableau);
-struct Rational **getSolution(struct Tableau *tableau);
-void printSolution(struct Tableau *tableau);
+void simplex_free_tableau(struct Tableau *tableau);
 
-struct Tableau *simplexPhaseI(struct Tableau *tab);
-void simplexPhaseII(struct Tableau *tableau);
-void prepareTableauForPhaseII(struct Tableau *phase1, struct Tableau *tableau);
+/**
+ * @brief Print the tableau to stdout.
+ *
+ * This function prints the given tableau to stdout.
+ *
+ * @param tableau
+ *    pointer to tableau to print
+ */
+void simplex_print_tableau(struct Tableau *tableau);
 
-int ggT(int a, int b);
-void minimizeDivisor(struct Tableau *tableau);
+/**
+ * @brief Get current solution of tableau.
+ *
+ * This function returns the current solution of the given tableau.
+ * solution[i] = value of variable i as rational number
+ *
+ * @param tableau
+ *    tableau to read solution
+ * @return current solution of tableau
+ */
+struct Rational **simplex_get_solution(struct Tableau *tableau);
+
+/**
+ * @brief Print tableau to stdout.
+ *
+ * This function prints the given tableau to stdout.
+ *
+ * @param tableau
+ *    tableau to print
+ */
+void simplex_print_solution(struct Tableau *tableau);
+
+/**
+ * @brief Phase 1 of simplex algorithm: find start corner.
+ *
+ * This function creates a new tableau which extends the given tableau with
+ * a new identity matrix and use the extended tableau to calculate a valid
+ * corner. This corner can be used for phase 2 of the simplex algorithm, i.e.
+ * with the help of "prepare_with_start_corner".
+ *
+ * @param tableau
+ *    tableau to find start corner
+ * @return solved, extended tableau
+ */
+struct Tableau *simplex_find_start_corner(struct Tableau *tab);
+
+/**
+ * @brief Prepare phase 2 of simplex algorithm.
+ *
+ * This function prepares the given tableau "tableau" for the phase 2 of the
+ * simplex algorithm with the help of the given tableau "phase1", which have to
+ * be a solved, extended tableau.
+ *
+ * @param phase1
+ *    solved extended tableau
+ * @param tableau
+ *    tableau of optimization problem
+ */
+void prepare_with_start_corner(struct Tableau *phase1, struct Tableau *tableau);
+
+/**
+ * @brief Phase 2 of simplex algorithm.
+ *
+ * This function solves the optimization problem given as valid tableau.
+ *
+ * @param tableau
+ *    problem to solve
+ */
+void simplex_find_best_solution(struct Tableau *tableau);
 
 #endif

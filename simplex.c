@@ -1,13 +1,57 @@
+/**
+ * @brief Source file for simplex.
+ *
+ * This file implements the simplex functions.
+ *
+ * @file simplex.c
+ * @author Thomas Irgang
+ * @date 17 Feb 2015
+ */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-#include "rational.h"
-
 #include "simplex.h"
 
+/*
+ * @brief Resize the given tableau.
+ *
+ * This function resize the given tableau to fit the given size
+ *
+ * TODO: implement add condition and integer solution, which will require this function
+ *
+ * @param tableau
+ *    tableau to resize
+ * @param equations
+ *    number of equations of the resized tableau
+ * @param variables
+ *    number of variables of the resized tableau
+static void resize_tableau(struct Tableau *tableau, int equations, int variables); */
 
-struct Tableau* create_tableau(int equations, int variables)
+/**
+ * @brief Update pivot element of tableau.
+ *
+ * This function implements the rule of Bland to update the pivot column
+ * and line of the given tableau.
+ *
+ * @param tableau
+ *    tableau to update pivot
+ */
+static void update_pivot(struct Tableau *tableau);
+
+/**
+ * @brief Implementation of simplex step.
+ *
+ * This function implements the simplex step. It switch, based on the values
+ * of pivotLine and pivotColumn, a basis and a none basis variable.
+ *
+ * @param tableau
+ *    tableau to calculate step
+ */
+static void simplex_step(struct Tableau *tableau);
+
+struct Tableau* simplex_create_tableau(int equations, int variables)
 {
     int i, j;
     struct Tableau *tableau = NULL;
@@ -23,23 +67,23 @@ struct Tableau* create_tableau(int equations, int variables)
         tableau->A[i] = (struct Rational **)malloc((variables - equations) * sizeof(struct Rational *));
         for(j=0; j<(variables - equations); ++j)
         {
-            tableau->A[i][j] = createRational();
+            tableau->A[i][j] = rational_create();
         }
     }
 
     tableau->b = (struct Rational **)malloc(equations * sizeof(struct Rational *));
     for(i=0; i<equations; ++i)
     {
-        tableau->b[i] = createRational();
+        tableau->b[i] = rational_create();
     }
 
     tableau->c = (struct Rational **)malloc((variables - equations) * sizeof(struct Rational *));
     for(i=0; i<(variables - equations); ++i)
     {
-        tableau->c[i] = createRational();
+        tableau->c[i] = rational_create();
     }
 
-    tableau->z = createRational();
+    tableau->z = rational_create();
 
     tableau->bvs = (int *)malloc(equations * sizeof(int));
     for(i=0; i<equations; ++i)
@@ -59,7 +103,7 @@ struct Tableau* create_tableau(int equations, int variables)
     return tableau;
 }
 
-void freeTableau(struct Tableau *tableau)
+void simplex_free_tableau(struct Tableau *tableau)
 {
     int i, j;
 
@@ -94,7 +138,7 @@ void freeTableau(struct Tableau *tableau)
     free(tableau);
 }
 
-void printTableau(struct Tableau *tableau)
+void simplex_print_tableau(struct Tableau *tableau)
 {
     int i,j;
     struct Rational *tmp;
@@ -103,12 +147,12 @@ void printTableau(struct Tableau *tableau)
     printf("Tableau:\n");
     for(i=0; i<tableau->cols; ++i)
     {
-        string = toString(tableau->c[i]);
+        string = rational_to_string(tableau->c[i]);
         printf("%8s ", *string);
         free(*string);
         free(string);
     }
-    string = toString(tableau->z);
+    string = rational_to_string(tableau->z);
     printf(" |  %8s\n", *string);
     free(*string);
     free(string);
@@ -121,12 +165,12 @@ void printTableau(struct Tableau *tableau)
     {
         for(j=0; j<tableau->cols; ++j)
         {
-            string = toString(tableau->A[i][j]);
+            string = rational_to_string(tableau->A[i][j]);
             printf("%8s ", *string);
             free(*string);
             free(string);
         }
-        string = toString(tableau->b[i]);
+        string = rational_to_string(tableau->b[i]);
         printf(" |  %8s\n", *string);
         free(*string);
         free(string);
@@ -134,8 +178,8 @@ void printTableau(struct Tableau *tableau)
 
     printf("Pivot-Line: %d, Pivot-Column: %d\n", tableau->pivotLine, tableau->pivotColumn);
 
-    tmp = invertSign(tableau->z);
-    string = toString(tmp);
+    tmp = rational_invertSign(tableau->z);
+    string = rational_to_string(tmp);
     printf("aktueller Zielfunktionswert: %s\n", *string);
     free(*string);
     free(string);
@@ -165,7 +209,7 @@ void printTableau(struct Tableau *tableau)
     printf(" ]\n");
 }
 
-struct Rational **getSolution(struct Tableau *tableau)
+struct Rational **simplex_get_solution(struct Tableau *tableau)
 {
     struct Rational **solution;
     int i;
@@ -186,16 +230,16 @@ struct Rational **getSolution(struct Tableau *tableau)
     return solution;
 }
 
-void printSolution(struct Tableau *tableau)
+void simplex_print_solution(struct Tableau *tableau)
 {
     int i;
-    struct Rational **solution = getSolution(tableau);
+    struct Rational **solution = simplex_get_solution(tableau);
     char **string;
 
     printf("[ ");
     for(i=0; i<(tableau->cols + tableau->rows); ++i)
     {
-        string = toString(&((*solution)[i]));
+        string = rational_to_string(&((*solution)[i]));
         printf("%s", *string);
         free(*string);
         free(string);
@@ -211,7 +255,7 @@ void printSolution(struct Tableau *tableau)
     free(solution);
 }
 
-void resizeTableau(struct Tableau *tableau, int equations, int variables)
+/*static void resize_tableau(struct Tableau *tableau, int equations, int variables)
 {
     int i, j;
 
@@ -241,7 +285,7 @@ void resizeTableau(struct Tableau *tableau, int equations, int variables)
                 tableau->A[i] = (struct Rational **)malloc(variables * sizeof(struct Rational *));
                 for(j=0; j<variables; ++j)
                 {
-                    tableau->A[i][j] = createRational();
+                    tableau->A[i][j] = rational_create();
                 }
             }
             else
@@ -253,7 +297,7 @@ void resizeTableau(struct Tableau *tableau, int equations, int variables)
                 tableau->A[i] = (struct Rational **)realloc(tableau->A[i], variables * sizeof(struct Rational *));
                 for(j=tableau->cols; j<variables; ++j)
                 {
-                    tableau->A[i][j] = createRational();
+                    tableau->A[i][j] = rational_create();
                 }
             }
         }
@@ -266,7 +310,7 @@ void resizeTableau(struct Tableau *tableau, int equations, int variables)
     tableau->c = (struct Rational **)realloc(tableau->c, variables * sizeof(struct Rational *));
     for(j=tableau->cols; j<variables; ++j)
     {
-        tableau->c[j] = createRational();
+        tableau->c[j] = rational_create();
     }
 
     for(j=equations; j<tableau->rows; ++j)
@@ -276,7 +320,7 @@ void resizeTableau(struct Tableau *tableau, int equations, int variables)
     tableau->b = (struct Rational **)realloc(tableau->b, equations * sizeof(struct Rational *));
     for(j=tableau->rows; j<equations; ++j)
     {
-        tableau->b[j] = createRational();
+        tableau->b[j] = rational_create();
     }
 
     tableau->bvs = (int *)realloc(tableau->bvs, variables * sizeof(int));
@@ -285,12 +329,12 @@ void resizeTableau(struct Tableau *tableau, int equations, int variables)
 
     tableau->cols = variables;
     tableau->rows = equations;
-}
+}*/
 
-void updatePivot(struct Tableau *tableau)
+static void update_pivot(struct Tableau *tableau)
 {
     int i;
-    struct Rational *min = createRational();
+    struct Rational *min = rational_create();
     struct Rational *tmp = NULL;
 
     tableau->pivotColumn = -1;
@@ -317,8 +361,8 @@ void updatePivot(struct Tableau *tableau)
             {
                 if((tableau->A[i][tableau->pivotColumn])->n > 0)
                 {
-                    tmp = divide(tableau->b[i], tableau->A[i][tableau->pivotColumn]);
-                    if(1 == is_a_smaller_than_b(tmp, min) || tableau->pivotLine == -1)
+                    tmp = rational_divide(tableau->b[i], tableau->A[i][tableau->pivotColumn]);
+                    if(1 == rational_is_a_smaller_than_b(tmp, min) || tableau->pivotLine == -1)
                     {
                         tableau->pivotLine = i;
                         free(min);
@@ -340,7 +384,7 @@ void updatePivot(struct Tableau *tableau)
 }
 
 
-void simplexStep(struct Tableau *tableau)
+static void simplex_step(struct Tableau *tableau)
 {
     int i, j, temp;
     struct Rational *pivotValue, *tmp, *tmp2, *fact;
@@ -352,54 +396,54 @@ void simplexStep(struct Tableau *tableau)
     {
         if(i == tableau->pivotLine)
         {
-            bv[i] = getRational(1, 1);
+            bv[i] = rational_get(1, 1);
         }
         else
         {
-            bv[i] = getRational(0, 1);
+            bv[i] = rational_get(0, 1);
         }
     }
-    cb = getRational(0,1);
+    cb = rational_get(0,1);
 
-    pivotValue = cloneRational(tableau->A[tableau->pivotLine][tableau->pivotColumn]);
+    pivotValue = rational_clone(tableau->A[tableau->pivotLine][tableau->pivotColumn]);
 
     if(!(pivotValue->n == 1 && pivotValue->d == 1))
     {
         for(i=0; i<tableau->cols; ++i)
         {
             tmp = tableau->A[tableau->pivotLine][i];
-            tableau->A[tableau->pivotLine][i] = divide(tableau->A[tableau->pivotLine][i], pivotValue);
+            tableau->A[tableau->pivotLine][i] = rational_divide(tableau->A[tableau->pivotLine][i], pivotValue);
             free(tmp);
         }
 
         tmp = bv[tableau->pivotLine];
-        bv[tableau->pivotLine] = divide(bv[tableau->pivotLine], pivotValue);
+        bv[tableau->pivotLine] = rational_divide(bv[tableau->pivotLine], pivotValue);
         free(tmp);
 
         tmp = tableau->b[tableau->pivotLine];
-        tableau->b[tableau->pivotLine] = divide(tableau->b[tableau->pivotLine], pivotValue);
+        tableau->b[tableau->pivotLine] = rational_divide(tableau->b[tableau->pivotLine], pivotValue);
         free(tmp);
     }
 
-    fact = cloneRational(tableau->c[tableau->pivotColumn]);
+    fact = rational_clone(tableau->c[tableau->pivotColumn]);
     for(i=0; i<tableau->cols; ++i)
     {
         tmp = tableau->c[i];
-        tmp2 = multiply(tableau->A[tableau->pivotLine][i], fact);
-        tableau->c[i] = subtract(tableau->c[i], tmp2);
+        tmp2 = rational_multiply(tableau->A[tableau->pivotLine][i], fact);
+        tableau->c[i] = rational_subtract(tableau->c[i], tmp2);
         free(tmp2);
         free(tmp);
     }
 
     tmp = cb;
-    tmp2 = multiply(bv[tableau->pivotLine], fact);
-    cb = subtract(cb, tmp2);
+    tmp2 = rational_multiply(bv[tableau->pivotLine], fact);
+    cb = rational_subtract(cb, tmp2);
     free(tmp2);
     free(tmp);
 
     tmp = tableau->z;
-    tmp2 = multiply(tableau->b[tableau->pivotLine], fact);
-    tableau->z = subtract(tableau->z, tmp2);
+    tmp2 = rational_multiply(tableau->b[tableau->pivotLine], fact);
+    tableau->z = rational_subtract(tableau->z, tmp2);
     free(tmp2);
     free(tmp);
     free(fact);
@@ -411,25 +455,25 @@ void simplexStep(struct Tableau *tableau)
             continue;
         }
 
-        fact = cloneRational(tableau->A[j][tableau->pivotColumn]);
+        fact = rational_clone(tableau->A[j][tableau->pivotColumn]);
         for(i=0; i<tableau->cols; ++i)
         {
             tmp = tableau->A[j][i];
-            tmp2 = multiply(tableau->A[tableau->pivotLine][i], fact);
-            tableau->A[j][i] = subtract(tableau->A[j][i], tmp2);
+            tmp2 = rational_multiply(tableau->A[tableau->pivotLine][i], fact);
+            tableau->A[j][i] = rational_subtract(tableau->A[j][i], tmp2);
             free(tmp2);
             free(tmp);
         }
 
         tmp = bv[j];
-        tmp2 = multiply(bv[tableau->pivotLine], fact);
-        bv[j] = subtract(bv[j], tmp2);
+        tmp2 = rational_multiply(bv[tableau->pivotLine], fact);
+        bv[j] = rational_subtract(bv[j], tmp2);
         free(tmp2);
         free(tmp);
 
         tmp = tableau->b[j];
-        tmp2 = multiply(tableau->b[tableau->pivotLine], fact);
-        tableau->b[j] = subtract(tableau->b[j], tmp2);
+        tmp2 = rational_multiply(tableau->b[tableau->pivotLine], fact);
+        tableau->b[j] = rational_subtract(tableau->b[j], tmp2);
         free(tmp2);
         free(tmp);
         free(fact);
@@ -451,39 +495,39 @@ void simplexStep(struct Tableau *tableau)
     free(pivotValue);
 }
 
-struct Tableau *simplexPhaseI(struct Tableau *tab)
+struct Tableau *simplex_find_start_corner(struct Tableau *tab)
 {
     int i, j;
     struct Tableau *phase1;
     struct Rational *tmp;
 
-    phase1 = create_tableau(tab->rows, (tab->cols + 2*tab->rows));
+    phase1 = simplex_create_tableau(tab->rows, (tab->cols + 2*tab->rows));
 
     for(i=0; i<tab->rows; ++i)
     {
         for(j=0; j<tab->cols; ++j)
         {
             free(phase1->A[i][j]);
-            phase1->A[i][j] = getRational((tab->A[i][j])->n, (tab->A[i][j])->d);
+            phase1->A[i][j] = rational_get((tab->A[i][j])->n, (tab->A[i][j])->d);
         }
     }
 
     for(i=0; i<phase1->rows; ++i)
     {
         free(phase1->A[phase1->rows-1-i][phase1->cols-1-i]);
-        phase1->A[phase1->rows-1-i][phase1->cols-1-i] = getRational(1,1);
+        phase1->A[phase1->rows-1-i][phase1->cols-1-i] = rational_get(1,1);
     }
 
     for(i=0; i<phase1->cols; ++i)
     {
         free(phase1->c[i]);
-        phase1->c[i] = getRational(0,1);
+        phase1->c[i] = rational_get(0,1);
         if(i < phase1->cols)
         {
             for(j=0; j<phase1->rows; ++j)
             {
                 tmp = phase1->c[i];
-                phase1->c[i] = add(phase1->c[i], phase1->A[j][i]);
+                phase1->c[i] = rational_add(phase1->c[i], phase1->A[j][i]);
                 free(tmp);
             }
         }
@@ -492,13 +536,13 @@ struct Tableau *simplexPhaseI(struct Tableau *tab)
     for(j=0; j<tab->rows; ++j)
     {
         free(phase1->b[j]);
-        phase1->b[j] = getRational((tab->b[j])->n, (tab->b[j])->d);
+        phase1->b[j] = rational_get((tab->b[j])->n, (tab->b[j])->d);
     }
 
     for(j=0; j<phase1->rows; ++j)
     {
         tmp = phase1->z;
-        phase1->z = add(phase1->z, phase1->b[j]);
+        phase1->z = rational_add(phase1->z, phase1->b[j]);
         free(tmp);
     }
 
@@ -512,20 +556,20 @@ struct Tableau *simplexPhaseI(struct Tableau *tab)
         phase1->bvs[i] = i + phase1->cols;
     }
 
-    updatePivot(phase1);
+    update_pivot(phase1);
 
-    printTableau(phase1);
+    simplex_print_tableau(phase1);
 
     while(phase1->pivotColumn >= 0 && phase1->pivotLine >= 0)
     {
-        simplexStep(phase1);
-        updatePivot(phase1);
+        simplex_step(phase1);
+        update_pivot(phase1);
     }
 
     return phase1;
 }
 
-void prepareTableauForPhaseII(struct Tableau *phase1, struct Tableau *tableau)
+void prepare_with_start_corner(struct Tableau *phase1, struct Tableau *tableau)
 {
     int i, j;
 
@@ -543,19 +587,19 @@ void prepareTableauForPhaseII(struct Tableau *phase1, struct Tableau *tableau)
                 }
             }
             tableau->pivotLine = i;
-            simplexStep(tableau);
+            simplex_step(tableau);
         }
     }
 }
 
-void simplexPhaseII(struct Tableau *tableau)
+void simplex_find_best_solution(struct Tableau *tableau)
 {
 
-    updatePivot(tableau);
+    update_pivot(tableau);
 
     while(tableau->pivotColumn >= 0 && tableau->pivotLine >= 0)
     {
-        simplexStep(tableau);
-        updatePivot(tableau);
+        simplex_step(tableau);
+        update_pivot(tableau);
     }
 }

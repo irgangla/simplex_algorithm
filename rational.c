@@ -1,20 +1,45 @@
-#include "rational.h"
+/**
+ * @brief Source file for rational.
+ *
+ * This file implements the rational functions.
+ *
+ * @file rational.c
+ * @author Thomas Irgang
+ * @date 17 Feb 2015
+ */
+
 #include <stdlib.h>
 #include <stdio.h>
 
-struct Rational *createRational()
+#include "rational.h"
+
+/**
+ * @brief Largest common divisor.
+ *
+ * This function calculates the largest common divisor of the given
+ * two integer values.
+ *
+ * @param a
+ *    integer a
+ * @param b
+ *    integer b
+ * @return largest common divisor of a and b
+ */
+static int r_largest_common_divisor(int a, int b);
+
+struct Rational *rational_create()
 {
-    return getRational(0, 1);
+    return rational_get(0, 1);
 }
 
-struct Rational *getRational(int nominator, int denominator)
+struct Rational *rational_get(int nominator, int denominator)
 {
     struct Rational *r = NULL;
 
     r = (struct Rational *)malloc(sizeof(struct Rational));
     if(r == NULL)
     {
-        fprintf(stderr, "Memory error in getRational() of rational. Emergeny stop program!\n");
+        fprintf(stderr, ERROR_MALLOC_FAILED);
         exit(EXIT_FAILURE);
     }
 
@@ -25,9 +50,9 @@ struct Rational *getRational(int nominator, int denominator)
 }
 
 
-void normalize(struct Rational *r)
+void rational_normalize(struct Rational *r)
 {
-    int div = ggT(r->n , r->d);
+    int div = r_largest_common_divisor(r->n , r->d);
 
     r->n = (r->n)/div;
     r->d = (r->d)/div;
@@ -40,7 +65,7 @@ void normalize(struct Rational *r)
 }
 
 
-struct Rational *multiply(struct Rational *a, struct Rational *b)
+struct Rational *rational_multiply(struct Rational *a, struct Rational *b)
 {
     int n, d;
     struct Rational *r;
@@ -48,13 +73,13 @@ struct Rational *multiply(struct Rational *a, struct Rational *b)
     n = (a->n) * (b->n);
     d = (a->d) * (b->d);
 
-    r = getRational(n, d);
-    normalize(r);
+    r = rational_get(n, d);
+    rational_normalize(r);
 
     return r;
 }
 
-struct Rational *divide(struct Rational *a, struct Rational *b)
+struct Rational *rational_divide(struct Rational *a, struct Rational *b)
 {
     int n, d;
     struct Rational *r = NULL;
@@ -62,13 +87,13 @@ struct Rational *divide(struct Rational *a, struct Rational *b)
     n = (a->n) * (b->d);
     d = (a->d) * (b->n);
 
-    r = getRational(n, d);
-    normalize(r);
+    r = rational_get(n, d);
+    rational_normalize(r);
 
     return r;
 }
 
-struct Rational *add(struct Rational *a, struct Rational *b)
+struct Rational *rational_add(struct Rational *a, struct Rational *b)
 {
     int n, d;
     struct Rational *r;
@@ -76,14 +101,14 @@ struct Rational *add(struct Rational *a, struct Rational *b)
     n = (a->n) * (b->d) + (b->n) * (a->d);
     d = (a->d) * (b->d);
 
-    r = getRational(n, d);
-    normalize(r);
+    r = rational_get(n, d);
+    rational_normalize(r);
 
     return r;
 }
 
 
-struct Rational *subtract(struct Rational *a, struct Rational *b)
+struct Rational *rational_subtract(struct Rational *a, struct Rational *b)
 {
     int n, d;
     struct Rational *r;
@@ -91,13 +116,13 @@ struct Rational *subtract(struct Rational *a, struct Rational *b)
     n = (a->n) * (b->d) - (b->n) * (a->d);
     d = (a->d) * (b->d);
 
-    r = getRational(n, d);
-    normalize(r);
+    r = rational_get(n, d);
+    rational_normalize(r);
 
     return r;
 }
 
-void printRational(struct Rational *a)
+void rational_print(struct Rational *a)
 {
     if(a->d == 1)
     {
@@ -109,16 +134,21 @@ void printRational(struct Rational *a)
     }
 }
 
-char **toString(struct Rational *a)
+char **rational_to_string(struct Rational *a)
 {
     char **string = NULL;
     int n;
 
     string = (char **)malloc(sizeof(char *));
-    *string = (char *)malloc(BUFFER * sizeof(char));
     if(string == NULL)
     {
-        fprintf(stderr, "Not enough memory!\n");
+        fprintf(stderr, ERROR_MALLOC_FAILED);
+        exit(EXIT_FAILURE);
+    }
+    *string = (char *)malloc(BUFFER * sizeof(char));
+    if(*string == NULL)
+    {
+        fprintf(stderr, ERROR_MALLOC_FAILED);
         exit(EXIT_FAILURE);
     }
 
@@ -143,7 +173,7 @@ char **toString(struct Rational *a)
 }
 
 
-int ggT(int a, int b)
+static int r_largest_common_divisor(int a, int b)
 {
     int tmp;
 
@@ -165,7 +195,7 @@ int ggT(int a, int b)
     return a;
 }
 
-int is_a_smaller_than_b(struct Rational *a, struct Rational *b)
+int rational_is_a_smaller_than_b(struct Rational *a, struct Rational *b)
 {
     int va, vb;
 
@@ -182,12 +212,12 @@ int is_a_smaller_than_b(struct Rational *a, struct Rational *b)
     }
 }
 
-struct Rational *invertSign(struct Rational *a)
+struct Rational *rational_invertSign(struct Rational *a)
 {
-    return getRational(-a->n, a->d);
+    return rational_get(-a->n, a->d);
 }
 
-struct Rational *cloneRational(struct Rational *a)
+struct Rational *rational_clone(struct Rational *a)
 {
-    return getRational(a->n, a->d);
+    return rational_get(a->n, a->d);
 }
