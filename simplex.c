@@ -9,7 +9,7 @@
 
 struct Tableau* create_tableau(int equations, int variables){
   int i, j;
-  struct Tableau *tableau;
+  struct Tableau *tableau = NULL;
 
   tableau = (struct Tableau*)malloc(sizeof(struct Tableau));
 
@@ -176,6 +176,9 @@ void printSolution(struct Tableau *tableau){
     }
   }
   printf(" ]\n");
+
+  free(*solution);
+  free(solution);
 }
 
 void resizeTableau(struct Tableau *tableau, int equations, int variables){
@@ -264,14 +267,18 @@ void updatePivot(struct Tableau *tableau){
           if(1 == is_a_smaller_than_b(tmp, min) || tableau->pivotLine == -1){
             tableau->pivotLine = i;
             free(min);
+            min = NULL;
             min = tmp;
           }else{
             free(tmp);
+            tmp = NULL;
           }
         }
       }
     }
   }while(tableau->pivotColumn != -1 && tableau->pivotLine == -1);
+
+  free(min);
 }
 
 
@@ -333,6 +340,8 @@ void simplexStep(struct Tableau *tableau){
   }
 
   tableau->bvs[tableau->pivotLine] = tableau->pivotColumn;
+
+  free(pivotValue);
 }
 
 struct Tableau *simplexPhaseI(struct Tableau *tab){
@@ -344,38 +353,38 @@ struct Tableau *simplexPhaseI(struct Tableau *tab){
 
   for(i=0; i<tab->rows; ++i){
     for(j=0; j<tab->cols; ++j){
+      free(phase1->A[i][j]);
       phase1->A[i][j] = getRational((tab->A[i][j])->n, (tab->A[i][j])->d);
     }
   }
 
   for(i=0; i<phase1->rows; ++i){
+    free(phase1->A[phase1->rows-1-i][phase1->cols-1-i]);
     phase1->A[phase1->rows-1-i][phase1->cols-1-i] = getRational(1,1);
     phase1->bvs[phase1->rows-1-i] = phase1->cols-1-i;
   }
 
   for(i=0; i<phase1->cols; ++i){
+    free(phase1->c[i]);
     phase1->c[i] = getRational(0,1);
     if(i < (phase1->cols-phase1->rows)){
       for(j=0; j<phase1->rows; ++j){
         tmp = phase1->c[i];
         phase1->c[i] = add(phase1->c[i], phase1->A[j][i]);
-        if(tmp != NULL){
-          free(tmp);
-        }
+        free(tmp);
       }
     }
   }
 
   for(j=0; j<tab->rows; ++j){
+    free(phase1->b[j]);
     phase1->b[j] = getRational((tab->b[j])->n, (tab->b[j])->d);
   }
 
   for(j=0; j<phase1->rows; ++j){
     tmp = phase1->z;
     phase1->z = add(phase1->z, phase1->b[j]);
-    if(tmp != NULL){
-      free(tmp);
-    }
+    free(tmp);
   }
 
 

@@ -38,8 +38,8 @@ int main(void){
   }
 
   printf("gebe Tableau Speicher frei ...\n");
-  free(phase1);
-  free(tableau);
+  freeTableau(phase1);
+  freeTableau(tableau);
 
   return EXIT_SUCCESS;
 }
@@ -61,6 +61,7 @@ struct Tableau *createTestdata(void){
     {0,-1,0,0,0,1,-1}
   };
   int basis[4] = {2,3,4,5};
+  int nbvs[2] = {0,1};
 
   for(i=0; i<6; i++){
     (tableau->c[i])->n = t[0][i];
@@ -79,6 +80,7 @@ struct Tableau *createTestdata(void){
   }
 
   memcpy(tableau->bvs, basis, 4*sizeof(int));
+  memcpy(tableau->nbvs, nbvs, 2*sizeof(int));
 
   return tableau;
 }
