@@ -19,7 +19,7 @@
  */
 struct Tableau{
   int rows; /**< Number of equations = number of rows of A. */
-  int cols; /**< Number of variables = number of columns of A. */
+  int cols; /**< Number of none basis variables = number of columns of A. */
   struct Rational ***A; /**< Matrix A. Ax = b. */
   struct Rational **b; /**< Limits vector b. Ax = b. */
   struct Rational **c; /**< Target function a. cx = z. */
