@@ -212,7 +212,7 @@ int rational_is_a_smaller_than_b(struct Rational *a, struct Rational *b)
     }
 }
 
-struct Rational *rational_invertSign(struct Rational *a)
+struct Rational *rational_invert_sign(struct Rational *a)
 {
     return rational_get(-a->n, a->d);
 }

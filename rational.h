@@ -113,7 +113,7 @@ struct Rational *rational_subtract(struct Rational *a, struct Rational *b);
  *
  * @return new rational number with inverted sign
  */
-struct Rational *rational_invertSign(struct Rational *a);
+struct Rational *rational_invert_sign(struct Rational *a);
 
 /**
  * @brief Compare two rational numbers.

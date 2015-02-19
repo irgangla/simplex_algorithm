@@ -178,7 +178,7 @@ void simplex_print_tableau(struct Tableau *tableau)
 
     printf("Pivot-Line: %d, Pivot-Column: %d\n", tableau->pivotLine, tableau->pivotColumn);
 
-    tmp = rational_invertSign(tableau->z);
+    tmp = rational_invert_sign(tableau->z);
     string = rational_to_string(tmp);
     printf("aktueller Zielfunktionswert: %s\n", *string);
     free(*string);
